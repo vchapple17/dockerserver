@@ -1,0 +1,70 @@
+
+version:  '3.7'
+services:
+  nginx:
+    container_name: nginx_web
+    image: nginx:stable-alpine
+    restart: always
+    ports:
+      - '80:80'
+      - '443:443'
+      - '8880:8880'
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./nginx/sites-enabled:/etc/nginx/sites-enabled
+      - ./nginx/conf.d:/etc/nginx/conf.d
+      - ./nginx/logs:/var/log/nginx
+      - ${PROJECT_FILES}:/project_files
+    networks:
+      web_host:
+        ipv4_address: 192.105.0.2
+
+  profile:
+    build:
+      context: docker/profile
+    container_name: profile
+    restart: always
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ${PROJECT_FILES}:/project_files
+      - ./php/php-fpm.conf:/usr/local/etc/php-fpm.conf
+      - ./php/pool.conf:/usr/local/etc/pool.conf
+      - ./php/php.ini:/usr/local/etc/php/php.ini
+      - ./php/supervisord.conf:/etc/supervisor/supervisord.conf
+      - ./php/supervisor_conf_d:/etc/supervisor/conf.d
+    extra_hosts:
+        - "valeriechapple.com:192.105.0.2" # to nginx
+    networks:
+      web_host:
+        ipv4_address: 192.105.0.5
+
+
+  # redis:
+  #   container_name: redis
+  #   image: redis
+  #   hostname: redis
+  #   restart: always
+  #   command: ["redis-server", "--appendonly", "yes"]
+  #   networks:
+  #     dev_hosting:
+  #       ipv4_address: 172.20.0.8
+  #
+
+  mailcatcher:
+    container_name: mailcatcher
+    image: schickling/mailcatcher
+    ports:
+      - 1080:1080
+      - 1025:1025
+    restart: always
+    networks:
+      web_host:
+        ipv4_address: 192.105.0.3
+
+networks:
+  web_host:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet:  192.105.0.0/16

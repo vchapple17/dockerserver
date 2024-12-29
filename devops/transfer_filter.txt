@@ -1,0 +1,12 @@
++ docker**
++ nginx
++ nginx/conf.d**
++ nginx/sites-enabled**
++ nginx/nginx.conf**
++ nginx/logs/.gitkeep
++ pgadmin**
++ php**
++ postgres**
++ .env
++ docker-compose.yml
+- **

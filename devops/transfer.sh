@@ -1,0 +1,1 @@
+rsync -rvzP --filter="merge ./transfer_filter.txt" ../ username@domain:/dockerweb --dry-run
