@@ -17,10 +17,14 @@ services:
       web_host:
         ipv4_address: 192.105.0.2
 
-  profile:
+  portfolio:
     build:
-      context: docker/profile
-    container_name: profile
+      context: docker/portfolio
+      dockerfile: Dockerfile
+      args:
+        - RUNNING_USER=${RUNNING_USER}
+        - RUNNING_GROUP=${RUNNING_GROUP}
+    container_name: portfolio
     restart: always
     volumes:
       - /etc/localtime:/etc/localtime:ro

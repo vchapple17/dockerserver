@@ -1,6 +1,12 @@
 FROM php:8.3-fpm-bookworm
 
-RUN groupadd -r web --gid=1000 && useradd -r -g web --uid=1000 web
+ARG RUNNING_GROUP
+ARG RUNNING_USER
+ENV RUNNING_GROUP=$RUNNING_GROUP
+ENV RUNNING_USER=$RUNNING_USER
+
+RUN groupadd -r web --gid=${RUNNING_GROUP}
+RUN useradd -r -m -g web --uid=${RUNNING_USER} web
 
 # Get repository and install wget and vim
 RUN apt-get update && apt-get install --no-install-recommends -y \
@@ -11,7 +17,8 @@ RUN apt-get update && apt-get install --no-install-recommends -y \
         unzip \
         gnupg \
         curl \
-        apt-transport-https
+        apt-transport-https \
+        acl
 
 # Add PostgreSQL repository
 RUN echo "deb http://apt.postgresql.org/pub/repos/apt/ bookworm-pgdg main" > /etc/apt/sources.list.d/pgdg.list
@@ -53,24 +60,26 @@ RUN curl -sS https://getcomposer.org/installer | php -- \
         --filename=composer
 
 # Install PHP extensions
-RUN docker-php-ext-configure gd --enable-gd --with-freetype --with-jpeg \
-    && pecl install redis \
-    && pecl install memcached \
-    && docker-php-ext-install \
+RUN docker-php-ext-configure gd --enable-gd --with-freetype --with-jpeg
+RUN pecl install redis
+RUN pecl install memcached
+RUN docker-php-ext-install \
         iconv \
         mbstring \
         intl \
         gd \
-        pgsql \
+        pgsql
+RUN docker-php-ext-install \
         pdo_pgsql \
         soap \
         zip \
-        pcntl \
+        pcntl
+RUN docker-php-ext-install \
         ftp \
         bcmath \
         xsl \
-        exif \
-    && docker-php-ext-enable \
+        exif
+RUN docker-php-ext-enable \
             redis \
             memcached \
             opcache
@@ -87,5 +96,9 @@ RUN pecl install apcu \
 # Clean repository
 RUN apt-get clean \
     && rm -rf /var/lib/apt/lists/*
+
+# Set user permissions for var
+RUN setfacl -dR -m u:"$RUNNING_USER":rwX -m u:$(whoami):rwX /var
+RUN setfacl -R -m u:"$RUNNING_USER":rwX -m u:$(whoami):rwX /var
 
 CMD ["/usr/bin/supervisord","--configuration=/etc/supervisor/supervisord.conf"]

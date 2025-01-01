@@ -10,11 +10,11 @@ This README would normally document whatever steps are necessary to get your app
 
 transfer files then run something like...
 
-  sudo docker exec -it profile composer --working-dir=/project_files/profile install
+  sudo docker exec -it portfolio composer --working-dir=/project_files/portfolio install
 
-  docker exec -it profile yarn --cwd /project_files/profile install
+  docker exec -it portfolio yarn --cwd /project_files/portfolio install
 
-  docker exec -it profile yarn --cwd /project_files/profile encore production --progress
+  docker exec -it portfolio yarn --cwd /project_files/portfolio encore production --progress
 
 ### What is this repository for? ###
 
